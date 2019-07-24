@@ -508,6 +508,28 @@ namespace SinclairCC.MakeMeAdmin
         }
 
 
+        public static string[] ProcessTerminationPatterns
+        {
+            get
+            {
+                string[] policyProcessTerminationPatterns = GetMultiString(PolicyRegistryKeyPath, null, "Process Termination Patterns");
+                string[] preferenceProcessTerminationPatterns = GetMultiString(PreferenceRegistryKeyPath, null, "Process Termination Patterns");
+                if (policyProcessTerminationPatterns != null)
+                { // The policy setting has a value. Go with whatever it says.
+                    return policyProcessTerminationPatterns;
+                }
+                else
+                { // The preference setting has a value. Go with whatever it says.
+                    return preferenceProcessTerminationPatterns;
+                }
+            }
+            set
+            {
+                SetMultiString(PreferenceRegistryKeyPath, null, "Process Termination Patterns", value);
+            }
+        }
+
+
         /// <summary>
         /// Removes from the computer all of the settings related to this application.
         /// </summary>

@@ -24,6 +24,8 @@ namespace SinclairCC.MakeMeAdmin
     using System.Security.Principal;
     using System.ServiceModel;
     using System.ServiceProcess;
+    using System.Text.RegularExpressions;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// This class is the Windows Service, which does privileged work
@@ -145,7 +147,7 @@ namespace SinclairCC.MakeMeAdmin
                         eventLogMessage.Append(processOwner.User.Value);
                         eventLogMessage.Append(".\"");
                     }
-                    ApplicationLog.WriteEvent(eventLogMessage.ToString(), EventID.ElevatedProcess, System.Diagnostics.EventLogEntryType.Information);
+                    ApplicationLog.WriteEvent(eventLogMessage.ToString(), EventID.ElevatedProcessDetected, System.Diagnostics.EventLogEntryType.Information);
                 }
             }
         }
@@ -156,7 +158,7 @@ namespace SinclairCC.MakeMeAdmin
             try
             {
                 System.Diagnostics.Process process = System.Diagnostics.Process.GetProcessById((int)processId);
-                returnValue = NativeMethods.IsProcessElevated2(process.Handle);
+                returnValue = NativeMethods.IsProcessElevated(process.Handle);
                 process.Dispose();
             }
             catch (System.ComponentModel.Win32Exception)
@@ -209,6 +211,8 @@ namespace SinclairCC.MakeMeAdmin
                 }
             }
 
+            Task elevatedProcessKillTask = Task.Factory.StartNew(() => TerminateElevatedProcesses());
+
             LocalAdministratorGroup.ValidateAllAddedUsers();
 
             if ((Settings.LogElevatedProcesses != ElevatedProcessLogging.Never) && (this.processWatcher == null))
@@ -220,6 +224,63 @@ namespace SinclairCC.MakeMeAdmin
 
         }
 
+        private void TerminateElevatedProcesses()
+        {
+            /*
+#if DEBUG
+            ApplicationLog.WriteEvent("Starting TerminateElevatedProcesses().", EventID.DebugMessage, System.Diagnostics.EventLogEntryType.Information);
+#endif
+            */
+
+            string[] processNamePatterns = Settings.ProcessTerminationPatterns;
+            Regex[] processNameRegExArray = new Regex[processNamePatterns.Length];
+
+            for (int i = 0; i < processNamePatterns.Length; i++)
+            {
+                ApplicationLog.WriteEvent(string.Format("process name pattern: \"{0}\"", processNamePatterns[i]), EventID.DebugMessage, System.Diagnostics.EventLogEntryType.Information);
+                processNameRegExArray[i] = new Regex(processNamePatterns[i], RegexOptions.IgnoreCase);
+            }
+
+            System.Diagnostics.Process[] processArray = System.Diagnostics.Process.GetProcesses();
+
+            foreach (System.Diagnostics.Process proc in processArray)
+            {
+                try
+                {
+                    if ((proc.MainModule != null) && (!string.IsNullOrEmpty(proc.MainModule.FileName)))
+                    {
+                        for (int r = 0; r < processNameRegExArray.Length; r++)
+                        {
+                            if (processNameRegExArray[r].IsMatch(proc.MainModule.FileName))
+                            {
+                                bool? processIsElevated = ProcessIsElevated((uint)proc.Id);
+                                if (processIsElevated.HasValue && processIsElevated.Value)
+                                { // Process is elevated.
+                                    proc.Kill();
+                                    ApplicationLog.WriteEvent(string.Format("Process \"{0}\" terminated.", proc.MainModule.FileName), EventID.ElevatedProcessTerminated, System.Diagnostics.EventLogEntryType.Information);
+                                }
+                            }
+                        }
+                    }
+                }
+                catch (System.ComponentModel.Win32Exception)
+                {
+                }
+                catch (System.InvalidOperationException)
+                {
+                }
+                catch (Exception)
+                {
+                    ApplicationLog.WriteEvent("Unhandled exception while looking for processes to terminate.", EventID.DebugMessage, System.Diagnostics.EventLogEntryType.Warning);
+                }
+            }
+
+            /*
+#if DEBUG
+            ApplicationLog.WriteEvent("Finished TerminateElevatedProcesses().", EventID.DebugMessage, System.Diagnostics.EventLogEntryType.Information);
+#endif
+            */
+        }
 
         /// <summary>
         /// Creates the WCF Service Host which is accessible via named pipes.

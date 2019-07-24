@@ -87,7 +87,7 @@ namespace SinclairCC.MakeMeAdmin
         }
         */
 
-        public static bool IsProcessElevated2(IntPtr processHandle)
+        public static bool IsProcessElevated(IntPtr processHandle)
         {
             System.Security.Principal.SecurityIdentifier adminsSid = new System.Security.Principal.SecurityIdentifier(System.Security.Principal.WellKnownSidType.BuiltinAdministratorsSid, null);
 

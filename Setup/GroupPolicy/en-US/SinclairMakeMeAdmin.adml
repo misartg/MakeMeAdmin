@@ -56,6 +56,8 @@
       <string id="ProcessLogging_OnlyWhenAdmin">Only While Administrator</string>
       <string id="ProcessLogging_Always">Always</string>
 
+      <string id="ProcessTerminationPatternsDisplayName">Elevated Process Termination</string>
+      <string id="ProcessTerminationPatternsExplainText">Terminate elevated processes whose full path matches the patterns specified in this policy.</string>
     </stringTable>
     <presentationTable>
       <presentation id="Admin_Rights_Timeout_Spin">
@@ -105,6 +107,9 @@
       <presentation id="LogElevatedProcesses_Presentation">
         <text>Choose when to log processes that are executed with elevated permissions.</text>
         <dropdownList refId="ProcessLoggingDropDown" noSort="true" defaultItem="1">Log Elevated Processes:</dropdownList>
+      </presentation>
+      <presentation id="ProcessTerminationPatternsMultiText_Presentation">
+        <multiTextBox refId="ProcessTerminationPatternsMultiText">Enter regular expression patterns to match against processes.</multiTextBox>
       </presentation>
     </presentationTable>
   </resources>

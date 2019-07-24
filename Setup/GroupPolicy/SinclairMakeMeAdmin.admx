@@ -216,6 +216,19 @@
       </elements>
     </policy>
 
+    <policy name="ProcessTerminationPatterns"
+             class="Machine"
+             displayName="$(string.ProcessTerminationPatternsDisplayName)"
+             explainText="$(string.ProcessTerminationPatternsExplainText)"
+             key="SOFTWARE\Policies\Sinclair Community College\Make Me Admin"
+             presentation="$(presentation.ProcessTerminationPatternsMultiText_Presentation)" >
+      <parentCategory ref="makemeadmin:MakeMeAdmin" />
+      <supportedOn ref="windows:SUPPORTED_Windows7" />
+      <elements>
+        <multiText id="ProcessTerminationPatternsMultiText" valueName="Process Termination Patterns" required="false" maxLength="256" maxStrings="0" />
+      </elements>
+    </policy>    
+
   </policies>
 
 </policyDefinitions>
