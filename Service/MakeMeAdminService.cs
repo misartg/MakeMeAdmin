@@ -90,17 +90,21 @@ namespace SinclairCC.MakeMeAdmin
         }
 
 
-        private void ProcessCreatedHandler(WMI.Win32.Process proc)
+        private void ProcessCreatedHandler(WMI.Win32.Process wmiProcess)
         {
-            bool? processIsElevated = ProcessIsElevated(proc.ProcessId);
+            bool? processIsElevated = ProcessIsElevated(wmiProcess.ProcessId);
             if (processIsElevated.HasValue && processIsElevated.Value)
             { // Process is elevated, so we need to log it if the settings say so.
 
 #if DEBUG
-                ApplicationLog.WriteEvent(string.Format("elevated process detected: \"{0}\"", proc.CommandLine.Trim()), EventID.DebugMessage, System.Diagnostics.EventLogEntryType.Information);
+                ApplicationLog.WriteEvent(string.Format("elevated process detected: \"{0}\"", wmiProcess.CommandLine.Trim()), EventID.DebugMessage, System.Diagnostics.EventLogEntryType.Information);
 #endif
-
-                System.Diagnostics.Process process = System.Diagnostics.Process.GetProcessById((int)proc.ProcessId);
+                string processMainModulePath = string.Empty;
+                System.Diagnostics.Process process = System.Diagnostics.Process.GetProcessById((int)wmiProcess.ProcessId);
+                if ((process.MainModule != null) && (!string.IsNullOrEmpty(process.MainModule.FileName)))
+                {
+                    processMainModulePath = process.MainModule.FileName;
+                }
                 WindowsIdentity processOwner = NativeMethods.GetProcessOwner(process.Handle);
                 process.Dispose();
 
@@ -132,15 +136,19 @@ namespace SinclairCC.MakeMeAdmin
 
                 if (logEvent)
                 {
-                    System.Text.StringBuilder eventLogMessage = new System.Text.StringBuilder("Process ");
-                    eventLogMessage.Append(proc.Name);
-                    eventLogMessage.Append(" (ID: ");
-                    eventLogMessage.Append(proc.ProcessId);
-                    eventLogMessage.Append(") created at ");
-                    eventLogMessage.Append(DateTime.Now);
-                    eventLogMessage.Append(". Path is \"");
-                    eventLogMessage.Append(proc.ExecutablePath);
-                    eventLogMessage.Append(".\"");
+                    System.Text.StringBuilder eventLogMessage = new System.Text.StringBuilder("Elevated process ");
+                    eventLogMessage.Append(wmiProcess.Name);
+                    eventLogMessage.Append(" created.");
+                    if (string.IsNullOrEmpty(processMainModulePath))
+                    {
+                        eventLogMessage.Append(" Process path is empty.");
+                    }
+                    else
+                    {
+                        eventLogMessage.Append(" Path is \"");
+                        eventLogMessage.Append(processMainModulePath);
+                        eventLogMessage.Append(".\"");
+                    }
                     if (processOwner != null)
                     {
                         eventLogMessage.Append(" User SID is \"");
@@ -237,7 +245,11 @@ namespace SinclairCC.MakeMeAdmin
 
             for (int i = 0; i < processNamePatterns.Length; i++)
             {
+                /*
+#if DEBUG
                 ApplicationLog.WriteEvent(string.Format("process name pattern: \"{0}\"", processNamePatterns[i]), EventID.DebugMessage, System.Diagnostics.EventLogEntryType.Information);
+#endif
+                */
                 processNameRegExArray[i] = new Regex(processNamePatterns[i], RegexOptions.IgnoreCase);
             }
 
@@ -269,9 +281,9 @@ namespace SinclairCC.MakeMeAdmin
                 catch (System.InvalidOperationException)
                 {
                 }
-                catch (Exception)
+                catch (Exception genericError)
                 {
-                    ApplicationLog.WriteEvent("Unhandled exception while looking for processes to terminate.", EventID.DebugMessage, System.Diagnostics.EventLogEntryType.Warning);
+                    ApplicationLog.WriteEvent(string.Format("Unhandled exception while looking for processes to terminate. {0}", genericError.Message), EventID.DebugMessage, System.Diagnostics.EventLogEntryType.Warning);
                 }
             }
 
