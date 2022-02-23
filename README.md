@@ -5,6 +5,8 @@ You can find documentation in the [wiki](https://github.com/pseymour/MakeMeAdmin
 
 The original code repo is here: https://github.com/pseymour/MakeMeAdmin
 
+The software is very impressive and could be a great improvement to our environment. 
+
 ## Our MIS ARTG fork ##
 
 We have forked this repo because I noticed that the Make Me Admin program wasn't working as expected in our environment, and I think I could make changes to make it work for us. I believe this is due to misconfiguration or some sort of difference with the systems I tried it on, not an issue with the software itself. 
