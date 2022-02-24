@@ -1,4 +1,4 @@
-# Make Me Admin
+# Make Me Admin #
 Make Me Admin is a simple application for Windows that allows standard user accounts to be elevated to administrator-level, on a temporary basis.
 
 You can find documentation in the [wiki](https://github.com/pseymour/MakeMeAdmin/wiki).
@@ -18,3 +18,7 @@ I am hopeful that if I can make some minor changes to force the calling function
 I also plan to make minor changes to the service name/GUI name to designate what's running is our fork's binaries, as not to confuse myself while testing (or in production), since I've already run into that issue where I think I'm running one build of Make Me Admin, but I was running a different one. 
 
 -JDM
+
+### Usage ###
+
+Install this forked version's binary from the installer in /Installers . For en-US, it's here: https://github.com/misartg/MakeMeAdmin/tree/main/Installers/en-us
