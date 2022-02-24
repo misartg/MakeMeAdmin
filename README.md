@@ -22,6 +22,7 @@ I also plan to make minor changes to the service name/GUI name to designate what
 ### Usage ###
 
 Install this forked version's binary from the [/Installers](https://github.com/misartg/MakeMeAdmin/tree/main/Installers) in our repo. 
+
 For en-US x64, it's right here: https://github.com/misartg/MakeMeAdmin/blob/main/Installers/en-us/MakeMeAdmin%202.3.0%20x64%20Debug.msi
 
 #### Silent installation ####
@@ -31,4 +32,5 @@ We install this silently with `msiexec /i "MakeMeAdmin 2.3.0 x64 Debug.msi" /qb 
 #### Silent uninstallation ####
 
 Since we were testing a lot, we did a silent uninstallation. It seemed important to do this before re-installation on our test systems. 
+
 Running `wmic product where "name = 'Make me Admin'" call uninstall /nointeractive` seemed to work well for us. 
